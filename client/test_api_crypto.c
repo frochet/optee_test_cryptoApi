@@ -107,26 +107,26 @@ int main(int argc, char *argv[])
 		TEEC_MEMREF_PARTIAL_INPUT,
 		TEEC_NONE,
 		TEEC_NONE);
-}
+	
 	/* Write key ID (example uses key ID = 1) in parameter #1 */
-operation.params[0].value.a = 1;
+	operation.params[0].value.a = 1;
 
-operation.params[1].memref.parent = &commsSM;
-operation.params[1].memref.offset = 0;
-operation.params[1].memref.size = 16;
+	operation.params[1].memref.parent = &commsSM;
+	operation.params[1].memref.offset = 0;
+	operation.params[1].memref.size = 16;
 
 	/* Write IV (example uses an IV of all zeros) in to Memory buffer. */
-ivPtr = (uint8_t*)commsSM.buffer;
-memset(ivPtr, 0, 16);
+	ivPtr = (uint8_t*)commsSM.buffer;
+	memset(ivPtr, 0, 16);
 
 	/* Start the encrypt operation within the TEE application. */
-result = TEEC_InvokeCommand(
-	&session,
-	CMD_ENCRYPT_INIT,
-	&operation,
-	NULL);
-if (result != TEEC_SUCCESS)
-	errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_INIT failed and returned error code 0x%x", result);
+	result = TEEC_InvokeCommand(
+		&session,
+		CMD_ENCRYPT_INIT,
+		&operation,
+		NULL);
+	if (result != TEEC_SUCCESS)
+		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_INIT failed and returned error code 0x%x", result);
 
 
 	/* ========================================================================
