@@ -127,7 +127,15 @@ int main(int argc, char *argv[])
 		NULL);
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_INIT failed and returned error code 0x%x", result);
-
+	/* [b] Start the digest operation within the TEE application. */
+	result = TEEC_InvokeCommand(
+		&session,
+		CMD_DIGEST_INIT,
+		NULL,
+		NULL);
+	
+	if (result != TEEC_SUCCESS)
+		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_INIT failed and returned error code 0x%x", result);
 
 	/* ========================================================================
 	[5] Perform the cryptographic update commands
@@ -197,7 +205,7 @@ int main(int argc, char *argv[])
 		TEEC_NONE,
 		TEEC_NONE,
 		TEEC_NONE);
-	
+
 	operation.params[0].memref.parent = &commsSM;
 	operation.params[0].memref.offset = 0;
 	operation.params[0].memref.size = 20;
