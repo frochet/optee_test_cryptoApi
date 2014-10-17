@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	[1] Connect to TEE
 	======================================================================== */
 	result = TEEC_InitializeContext(
-					NULL,  /* Select default TEE */
+		NULL,  /* Select default TEE */
 		&context);
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InitializeContext failed with error code 0x%x ", ressult);
@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
 		&session,
 		&uuid,
 		TEEC_LOGIN_PUBLIC,
-					NULL, /* No connection data needed for TEEC_LOGIN_USER. */
-					NULL, /* No payload, and do not want cancellation. */
+		NULL, /* No connection data needed for TEEC_LOGIN_USER. */
+		NULL, /* No payload, and do not want cancellation. */
 		&err_origin);
 
 	if (result != TEEC_SUCCESS)
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 		TEEC_MEMREF_PARTIAL_INPUT,
 		TEEC_NONE,
 		TEEC_NONE);
-	
+
 	/* Write key ID (example uses key ID = 1) in parameter #1 */
 	operation.params[0].value.a = 1;
 
@@ -197,6 +197,7 @@ int main(int argc, char *argv[])
 		TEEC_NONE,
 		TEEC_NONE,
 		TEEC_NONE);
+	
 	operation.params[0].memref.parent = &commsSM;
 	operation.params[0].memref.offset = 0;
 	operation.params[0].memref.size = 20;
