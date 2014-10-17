@@ -33,13 +33,13 @@ int main(int argc, char *argv[])
 		uint8_t* 		outputBuffer,
 		uint32_t		outputSize,
 		uint8_t*		digestBuffer
-	)
+		)
 	/* ========================================================================
 	[1] Connect to TEE
 	======================================================================== */
 	result = TEEC_InitializeContext(
 					NULL,  /* Select default TEE */
-					&context);
+		&context);
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InitializeContext failed with error code 0x%x ", ressult);
 
@@ -49,17 +49,17 @@ int main(int argc, char *argv[])
 	======================================================================== */
 	
 	result = TEEC_OpenSession(
-					&context,
-					&session,
-					&uuid,
-					TEEC_LOGIN_PUBLIC,
+		&context,
+		&session,
+		&uuid,
+		TEEC_LOGIN_PUBLIC,
 					NULL, /* No connection data needed for TEEC_LOGIN_USER. */
 					NULL, /* No payload, and do not want cancellation. */
-					&err_origin);
+		&err_origin);
 
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_OpenSession failed with code 0x%x origin 0x%x",
-		 			result, err_origin);
+			result, err_origin);
 
 
 
@@ -103,30 +103,30 @@ int main(int argc, char *argv[])
 	======================================================================== */
 	/* [a] Start the encrypt operation within the TEE application. */
 	operation.paramTypes = TEEC_PARAM_TYPES(
-			TEEC_VALUE_INPUT,
-			TEEC_MEMREF_PARTIAL_INPUT,
-			TEEC_NONE,
-			TEEC_NONE);
-	}
+		TEEC_VALUE_INPUT,
+		TEEC_MEMREF_PARTIAL_INPUT,
+		TEEC_NONE,
+		TEEC_NONE);
+}
 	/* Write key ID (example uses key ID = 1) in parameter #1 */
-	operation.params[0].value.a = 1;
+operation.params[0].value.a = 1;
 
-	operation.params[1].memref.parent = &commsSM;
-	operation.params[1].memref.offset = 0;
-	operation.params[1].memref.size = 16;
+operation.params[1].memref.parent = &commsSM;
+operation.params[1].memref.offset = 0;
+operation.params[1].memref.size = 16;
 
 	/* Write IV (example uses an IV of all zeros) in to Memory buffer. */
-	ivPtr = (uint8_t*)commsSM.buffer;
-	memset(ivPtr, 0, 16);
+ivPtr = (uint8_t*)commsSM.buffer;
+memset(ivPtr, 0, 16);
 
 	/* Start the encrypt operation within the TEE application. */
-	result = TEEC_InvokeCommand(
-			&session,
-			CMD_ENCRYPT_INIT,
-			&operation,
-			NULL);
-	if (result != TEEC_SUCCESS)
-		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_INIT failed and returned error code 0x%x", result);
+result = TEEC_InvokeCommand(
+	&session,
+	CMD_ENCRYPT_INIT,
+	&operation,
+	NULL);
+if (result != TEEC_SUCCESS)
+	errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_INIT failed and returned error code 0x%x", result);
 
 
 	/* ========================================================================
@@ -134,10 +134,10 @@ int main(int argc, char *argv[])
 	======================================================================== */
 	/* [a] Start the encrypt operation within the TEE application. */
 	operation.paramTypes = TEEC_PARAM_TYPES(
-			TEEC_MEMREF_WHOLE,
-			TEEC_MEMREF_PARTIAL_OUTPUT,
-			TEEC_NONE,
-			TEEC_NONE);
+		TEEC_MEMREF_WHOLE,
+		TEEC_MEMREF_PARTIAL_OUTPUT,
+		TEEC_NONE,
+		TEEC_NONE);
 	/* Note that the other fields of operation.params[0].memref need not be
 	initialized because the parameter type is TEEC_MEMREF_WHOLE */
 	operation.params[0].memref.parent = &inputSM;
@@ -148,9 +148,9 @@ int main(int argc, char *argv[])
 
 	/* Start the encrypt operation within the TEE application. */
 	result = TEEC_InvokeCommand(&session,
-								CMD_ENCRYPT_UPDATE,
-								&operation,
-								NULL);
+		CMD_ENCRYPT_UPDATE,
+		&operation,
+		NULL);
 
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_UPDATE failed and returned error code 0x%x", result);
@@ -160,9 +160,9 @@ int main(int argc, char *argv[])
 
 	/* [b] Start the digest operation within the TEE application. */
 	operation.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_PARTIAL_INPUT,
-											TEEC_NONE,
-											TEEC_NONE,
-											TEEC_NONE);
+		TEEC_NONE,
+		TEEC_NONE,
+		TEEC_NONE);
 
 	/* Note: we use the updated size in the MemRef output by the encryption. */
 
@@ -172,9 +172,9 @@ int main(int argc, char *argv[])
 
 
 	result = TEEC_InvokeCommand(&session,
-								CMD_DIGEST_UPDATE,
-								&operation,
-								NULL);
+		CMD_DIGEST_UPDATE,
+		&operation,
+		NULL);
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_UPDATE failed and returned error code 0x%x", result);
 
@@ -183,9 +183,9 @@ int main(int argc, char *argv[])
 	======================================================================== */
 	/* [a] Finalize the encrypt operation within the TEE application. */
 	result = TEEC_InvokeCommand(&session,
-								CMD_ENCRYPT_FINAL,
-								NULL,
-								NULL);
+		CMD_ENCRYPT_FINAL,
+		NULL,
+		NULL);
 
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_FINAL failed and returned error code 0x%x", result);
@@ -194,17 +194,17 @@ int main(int argc, char *argv[])
 
 /* [b] Finalize the digest operation within the TEE application. */
 	operation.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_PARTIAL_OUTPUT,
-											TEEC_NONE,
-											TEEC_NONE,
-											TEEC_NONE);
+		TEEC_NONE,
+		TEEC_NONE,
+		TEEC_NONE);
 	operation.params[0].memref.parent = &commsSM;
 	operation.params[0].memref.offset = 0;
 	operation.params[0].memref.size = 20;
 	
 	result = TEEC_InvokeCommand(&session,
-								CMD_DIGEST_FINAL,
-								&operation,
-								NULL);
+		CMD_DIGEST_FINAL,
+		&operation,
+		NULL);
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_FINAL failed and returned error code 0x%x", result);
 
