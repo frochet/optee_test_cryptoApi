@@ -15,5 +15,12 @@
 #define CMD_DIGEST_INIT 	3
 #define CMD_DIGEST_UPDATE 	4
 #define CMD_DIGEST_FINAL	5
+#define CMD_CREATE_KEY		6
+
+
+typedef struct sess_data{
+	TEE_Operationhandle *op_cipher;
+	TEE_Operationhandle *op_digest;
+}Sess_data;
 
 #endif /*TA_TEST_API_CRYPTO_H*/
