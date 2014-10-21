@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <err.h>
 #include <tee_client_api.h>
 #include <ta_test_api_crypto.h>
@@ -19,9 +21,7 @@ static int gen_key_session(void)
 	/* ========================================================================
 	[1] Connect to TEE
 	======================================================================== */
-	result = TEEC_InitializeContext(
-		NULL,  /* Select default TEE */
-		&context);
+	result = TEEC_InitializeContext(NULL, &context);
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InitializeContext failed with error code 0x%x ", result);
 
@@ -234,7 +234,7 @@ static int encrypt_example_session(
 
 	operation.params[0].memref.parent = &outputSM;
 	operation.params[0].memref.offset = 0;
-	operation.paramŝ[0].memref.size = operation.params[1].memref.size;
+	operation.params[0].memref.size = operation.params[1].memref.size;
 
 
 	result = TEEC_InvokeCommand(&session,
@@ -298,19 +298,20 @@ int main(int argc, char *argv[])
 	while ((c = getopt(argc, argv, "a:")) != -1)
 		switch (c)
 		{
-			case 'a': avalue = optarg; break:
+			case 'a': avalue = optarg; break;
 		}
 
 
 	if (strcmp(avalue, "gen_key") == 0)
 		return gen_key_session();
 	else if (strcmp(avalue, "enc_dec_example") == 0)
+	{
 		/* Allocate client buffers */
-		uint8_t const *inputBuffer = malloc(sizeof(uint8_t));
+		uint8_t *inputBuffer = malloc(sizeof(uint8_t));
 		*inputBuffer = 42;
 		uint32_t inputSize = 2;
 		uint8_t *outputBuffer = malloc(sizeof(uint8_t));
-		uint32_t ouputSize = 16;
+		uint32_t outputSize = 16;
 		uint8_t *digestBuffer = malloc(sizeof(uint8_t));
 		
 		return encrypt_example_session(
@@ -319,8 +320,9 @@ int main(int argc, char *argv[])
 					outputBuffer,
 					outputSize,
 					digestBuffer);
+	}
 	else{
-		fprintf("Uncorrect parameter %s\n", avalue);
+		printf("Uncorrect parameter");
 		return -1;
 	}
 

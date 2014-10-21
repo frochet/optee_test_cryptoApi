@@ -15,7 +15,7 @@ LDADD += -lteec -L$(TEEC_EXPORT)/lib
 .PHONY: all
 all: test_api_crypto
 
-hello_world: $(OBJS)
+test_api_crypto: $(OBJS)
 	$(CC) $(LDADD) -o $@ $<
 
 .PHONY: clean

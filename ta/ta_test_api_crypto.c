@@ -7,6 +7,10 @@
 
 #include "ta_test_api_crypto.h" //todo check .h directory
 
+typedef struct sess_data{
+	TEE_OperationHandle *op_cipher;
+	TEE_OperationHandle *op_digest;
+}Sess_data;
 
 TEE_Result TA_CreateEntryPoint(void)
 {

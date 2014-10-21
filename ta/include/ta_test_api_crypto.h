@@ -3,6 +3,7 @@
 #ifndef TA_TEST_API_CRYPTO_H
 #define TA_TEST_API_CRYPTO_H
 
+
 /* TA UUID */
 #define TA_TEST_API_CRYPTO {0xe1ee6b22, 0x560b, 0x11e4, \
 		{ 0xaa, 0x81, 0x00, 0x25, 0x22, 0x21, 0xc4, 0xf0} }
@@ -18,9 +19,4 @@
 #define CMD_CREATE_KEY		6
 
 
-typedef struct sess_data{
-	TEE_OperationHandle *op_cipher;
-	TEE_OperationHandle *op_digest;
-}Sess_data;
-
-#endif /*TA_TEST_API_CRYPTO_H*/:q!:
+#endif /*TA_TEST_API_CRYPTO_H*/
