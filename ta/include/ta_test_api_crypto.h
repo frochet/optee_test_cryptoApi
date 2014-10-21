@@ -19,8 +19,8 @@
 
 
 typedef struct sess_data{
-	TEE_Operationhandle *op_cipher;
-	TEE_Operationhandle *op_digest;
+	TEE_OperationHandle *op_cipher;
+	TEE_OperationHandle *op_digest;
 }Sess_data;
 
-#endif /*TA_TEST_API_CRYPTO_H*/
+#endif /*TA_TEST_API_CRYPTO_H*/:q!:
