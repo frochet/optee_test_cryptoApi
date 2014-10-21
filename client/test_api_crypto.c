@@ -9,7 +9,6 @@ static int gen_key_session(void)
 {
 	TEEC_Context 	context;
 	TEEC_Session 	session;
-	TEEC_Operation 	operation;
 
 	TEEC_UUID uuid = TA_TEST_API_CRYPTO;
 	TEEC_Result		result;
@@ -64,7 +63,18 @@ static int gen_key_session(void)
 	return 0;
 }
 
-static int encrypt_example_session(void)
+
+/*=========================================================================
+implements the encryption/decryption/digest example where the buffers
+of memory are pre-allocated by the calling entity. 
+============================================================================ */
+
+static int encrypt_example_session(
+		uint8_t const * inputBuffer,
+		uint32_t		inputSize,
+		uint8_t* 		outputBuffer,
+		uint32_t		outputSize,
+		uint8_t*		digestBuffer)
 {
 
 	TEEC_Context 	context;
@@ -82,18 +92,6 @@ static int encrypt_example_session(void)
 
 	TEEC_UUID uuid = TA_TEST_API_CRYPTO;
 
-	/* ============================================================================
-	Implement our library function where the buffers of memory are pre-allocated
-	by the calling entity. This is a common paradigm when interfacing with other
-	libraries provided by other providers.
-	============================================================================ */
-	TEEC_Result libraryFunction( 
-		uint8_t const * inputBuffer,
-		uint32_t		inputSize,
-		uint8_t* 		outputBuffer,
-		uint32_t		outputSize,
-		uint8_t*		digestBuffer
-		)
 	/* ========================================================================
 	[1] Connect to TEE
 	======================================================================== */
@@ -307,7 +305,20 @@ int main(int argc, char *argv[])
 	if (strcmp(avalue, "gen_key") == 0)
 		return gen_key_session();
 	else if (strcmp(avalue, "enc_dec_example") == 0)
-		return encrypt_example_session();
+		/* Allocate client buffers */
+		uint8_t const *inputBuffer = malloc(sizeof(uint8_t));
+		*inputBuffer = 42;
+		uint32_t inputSize = 2;
+		uint8_t *outputBuffer = malloc(sizeof(uint8_t));
+		uint32_t ouputSize = 16;
+		uint8_t *digestBuffer = malloc(sizeof(uint8_t));
+		
+		return encrypt_example_session(
+					inputBuffer,
+					inputSize,
+					outputBuffer,
+					outputSize,
+					digestBuffer);
 	else{
 		fprintf("Uncorrect parameter %s\n", avalue);
 		return -1;
