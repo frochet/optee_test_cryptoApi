@@ -5,11 +5,71 @@
 #include <string.h>
 
 
-int main(int argc, char *argv[])
+static int gen_key_session(void)
 {
 	TEEC_Context 	context;
 	TEEC_Session 	session;
-	TEEC_Operation 	peration;
+	TEEC_Operation 	operation;
+
+	TEEC_UUID uuid = TA_TEST_API_CRYPTO;
+	TEEC_Result		result;
+	uint32_t		err_origin;
+
+
+
+	/* ========================================================================
+	[1] Connect to TEE
+	======================================================================== */
+	result = TEEC_InitializeContext(
+		NULL,  /* Select default TEE */
+		&context);
+	if (result != TEEC_SUCCESS)
+		errx(1, "TEEC_InitializeContext failed with error code 0x%x ", result);
+
+
+	/* ========================================================================
+	[2] Open session with TEE application
+	======================================================================== */
+	
+	result = TEEC_OpenSession(
+		&context,
+		&session,
+		&uuid,
+		TEEC_LOGIN_PUBLIC,
+		NULL, /* No connection data needed for TEEC_LOGIN_PUBLIC. */
+		NULL, /* No payload, and do not want cancellation. */
+		&err_origin);
+
+	if (result != TEEC_SUCCESS)
+		errx(1, "TEEC_OpenSession failed with code 0x%x origin 0x%x",
+			result, err_origin);
+
+	/*========================================================================
+	[3] sends command to create a persistent AES key under keyID = 1 
+	    a keyID could have been passed in a param
+	 =======================================================================*/
+
+	result = TEEC_InvokeCommand(
+		&session,
+		CMD_CREATE_KEY,
+		NULL,
+		NULL);
+
+	if (result != TEEC_SUCCESS)
+		errx(1, "TEEC_InvokeCommand with CMD_CREATE_KEY failed and returned error code 0x%x", result);
+
+	TEEC_CloseSession(&session);
+	TEEC_FinalizeContext(&context);
+
+	return 0;
+}
+
+static int encrypt_example_session(void)
+{
+
+	TEEC_Context 	context;
+	TEEC_Session 	session;
+	TEEC_Operation 	operation;
 	
 	TEEC_Result		result;
 
@@ -41,7 +101,7 @@ int main(int argc, char *argv[])
 		NULL,  /* Select default TEE */
 		&context);
 	if (result != TEEC_SUCCESS)
-		errx(1, "TEEC_InitializeContext failed with error code 0x%x ", ressult);
+		errx(1, "TEEC_InitializeContext failed with error code 0x%x ", result);
 
 
 	/* ========================================================================
@@ -53,7 +113,7 @@ int main(int argc, char *argv[])
 		&session,
 		&uuid,
 		TEEC_LOGIN_PUBLIC,
-		NULL, /* No connection data needed for TEEC_LOGIN_USER. */
+		NULL, /* No connection data needed for TEEC_LOGIN_PUBLIC. */
 		NULL, /* No payload, and do not want cancellation. */
 		&err_origin);
 
@@ -133,7 +193,7 @@ int main(int argc, char *argv[])
 		CMD_DIGEST_INIT,
 		NULL,
 		NULL);
-	
+
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_INIT failed and returned error code 0x%x", result);
 
@@ -228,6 +288,31 @@ int main(int argc, char *argv[])
 	TEEC_FinalizeContext(&context);
 
 	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	
+
+	uint32_t c;
+	char *avalue;
+
+	while ((c = getopt(argc, argv, "a:")) != -1)
+		switch (c)
+		{
+			case 'a': avalue = optarg; break:
+		}
+
+
+	if (strcmp(avalue, "gen_key") == 0)
+		return gen_key_session();
+	else if (strcmp(avalue, "enc_dec_example") == 0)
+		return encrypt_example_session();
+	else{
+		fprintf("Uncorrect parameter %s\n", avalue);
+		return -1;
+	}
+
 }
 
 

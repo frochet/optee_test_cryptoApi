@@ -27,19 +27,19 @@ TEE_Result TA_OpenSessionEntryPoint(uint32_t param_types,
 	(void)&params
  	
  	/* allocate handles which will be used during the session*/
-
-
+	Sess_data *data = malloc(sizeof(Sess_data));
+	*sess_ctx = data;
 
 	return TEE_SUCCESS;
 }
 
 void TA_CloseSessionEntryPoint(void *sess_ctx)
 {
-	(void)&sess_ctx; /*unused parameter */
+	free(sess_ctx);
 }
 
-static TEE_Result encrypt_init(TEE_OperationHandle *op_cipher,
-	 uint32_t param_types, TEE_Param params[4], TEE_ObjectHandle *key)
+static TEE_Result encrypt_init(Sess_data* sessiondata,
+	 uint32_t param_types, TEE_Param params[4])
 {
 	uint32_t exp_param_types = TEE_PARAM_TYPES(
 		TEEC_VALUE_INPUT,
@@ -49,12 +49,35 @@ static TEE_Result encrypt_init(TEE_OperationHandle *op_cipher,
 	if (params_types != exp_param_types)
 		return TEE_ERROR_BAD_PARAMETERS;
 
+	/* Opening persistant object and getting key */
+	TEE_Result res;
+	uint32_t flags = TEE_DATA_FLAG_ACCESS_READ; 
+	TEE_ObjectHandle *key;
+	res = TEE_OpenPersistentObject(
+			TEE_STORAGE_PRIVATE,
+			&params[0].value.a,
+			sizeof(uint32_t),
+			flags,
+			key);
 
-	TEE_Result res = TEE_AllocateOperation(
-		op_cipher,
+	if (res != TEE_SUCCESS)
+		return res;
+	/* Setting operation key */
+
+
+	/*Allocating opration */
+
+	res = TEE_AllocateOperation(
+		sessiondata->op_cipher,
 		TEE_ALG_AES_CTS,
 		TEE_MODE_ENCRYPT,
 		128);
+
+	res = TEE_SetOperationKey(
+		*(sessiondata->op_cipher),
+		*key);
+	if (res != TEE_SUCCESS)
+		return res;
 
 	return res;
 }
@@ -92,7 +115,7 @@ static TEE_Result key_generation(void)
 
 	res = TEE_CreatePersistentObject(
 			TEE_STORAGE_PRIVATE,
-			1, sizeof(TEE_ObjectHandle),
+			1, sizeof(uint32_t),
 			flags,
 			&key,
 			NULL,
@@ -111,15 +134,12 @@ TEE_Result TA_InvokeCommandEntryPoint(void *sess_ctx, uint32_t cmd_id,
 						uint32_t param_types, TEE_Param params[4])
 {
 
-	(void)&sess_ctx;
-	TEE_OperationHandle *op_cipher;
-	TEE_OperationHandle *op_digest;
 
 	switch (cmd_id) {
 		case CMD_CREATE_KEY: 
 			(void)&params
 			return key_generation();
-		case CMD_ENCRYPT_INIT: return encrypt_init(op_cipher, param_types, params, key);
+		case CMD_ENCRYPT_INIT: return encrypt_init((Sess_data*)sess_ctx, param_types, params);
 		case CMD_ENCRYPT_UPDATE: break;
 		case CMD_ENCRYPT_FINAL: break;
 		case CMD_DIGEST_INIT: break;
