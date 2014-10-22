@@ -10,8 +10,9 @@ all: $(BINARY).ta
 $(BINARY).ta: $(BINARY).bin
 	rm -f $@
 	cat faked_armv7_uta_signed_header.bin $< > $@
-
+	mv e1ee6* out-client-aarch64/
+	mv *.o out-client-aarch64/
 clean: clean_ta_file
 .PHONY: clean_ta_file
 clean_ta_file:
-	rm -f $(BINARY).ta
+	rm -f out-client-aarch64/$(BINARY).ta

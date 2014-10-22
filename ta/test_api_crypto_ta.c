@@ -58,7 +58,7 @@ static TEE_Result encrypt_init(Sess_data* sessiondata,
 	// 	return TEE_ERROR_BAD_PARAMETERS;
 	TEE_Result res;
 	uint32_t flags = TEE_DATA_FLAG_ACCESS_READ; 
-	TEE_ObjectHandle *key;
+	TEE_ObjectHandle *key = TEE_Malloc(sizeof(TEE_ObjectHandle), 0);
 	(void)&param_types;
 	/* Opening persistant object and getting key */
 
@@ -101,9 +101,11 @@ static TEE_Result key_generation(void)
 	/* Allocate AES key object */
 
 	TEE_Result res;
-	TEE_ObjectHandle *key;
-	TEE_ObjectHandle *persKey;
+	/* implementation constant TEE_MALLOC_FILL_ZERO is not coded !*/
+	TEE_ObjectHandle *key = TEE_Malloc(sizeof(TEE_ObjectHandle), 0);
+	TEE_ObjectHandle *persKey = TEE_Malloc(sizeof(TEE_ObjectHandle), 0);
 	uint32_t flags = TEE_DATA_FLAG_ACCESS_READ | TEE_DATA_FLAG_ACCESS_WRITE;
+	uint32_t objectID = 1;
 
 	res = TEE_AllocateTransientObject(TEE_TYPE_AES, 128, key);
 
@@ -123,16 +125,16 @@ static TEE_Result key_generation(void)
 
 	res = TEE_CreatePersistentObject(
 			TEE_STORAGE_PRIVATE,
-			1, sizeof(uint32_t),
+			&objectID, sizeof(uint32_t),
 			flags,
-			&key,
+			*key,
 			NULL,
 			0,
 			persKey);
 	AMSG("AES key created !\n");
 	/* Persistent object is created, we don't need the transient object anymore	*/
 
-	TEE_FreeTransientObject(&key);
+	TEE_FreeTransientObject(*key);
 
 	return res;
 
@@ -145,14 +147,14 @@ TEE_Result TA_InvokeCommandEntryPoint(void *sess_ctx, uint32_t cmd_id,
 
 	switch (cmd_id) {
 		case CMD_CREATE_KEY: 
-			(void)&params
+			(void)&params;
 			return key_generation();
 		case CMD_ENCRYPT_INIT: return encrypt_init((Sess_data*)sess_ctx, param_types, params);
-		case CMD_ENCRYPT_UPDATE: break;
-		case CMD_ENCRYPT_FINAL: break;
-		case CMD_DIGEST_INIT: break;
-		case CMD_DIGEST_UPDATE: break;
-		case CMD_DIGEST_FINAL: break;
+		case CMD_ENCRYPT_UPDATE: 
+		case CMD_ENCRYPT_FINAL: 
+		case CMD_DIGEST_INIT: 
+		case CMD_DIGEST_UPDATE: 
+		case CMD_DIGEST_FINAL:
 
 		default:
 			return TEE_ERROR_BAD_PARAMETERS;
