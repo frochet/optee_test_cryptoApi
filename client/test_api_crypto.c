@@ -185,105 +185,105 @@ static int encrypt_example_session(
 		NULL);
 	if (result != TEEC_SUCCESS)
 		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_INIT failed and returned error code 0x%x", result);
-	/* [b] Start the digest operation within the TEE application. */
-	result = TEEC_InvokeCommand(
-		&session,
-		CMD_DIGEST_INIT,
-		NULL,
-		NULL);
+// 	/* [b] Start the digest operation within the TEE application. */
+// 	result = TEEC_InvokeCommand(
+// 		&session,
+// 		CMD_DIGEST_INIT,
+// 		NULL,
+// 		NULL);
 
-	if (result != TEEC_SUCCESS)
-		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_INIT failed and returned error code 0x%x", result);
+// 	if (result != TEEC_SUCCESS)
+// 		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_INIT failed and returned error code 0x%x", result);
 
-	/* ========================================================================
-	[5] Perform the cryptographic update commands
-	======================================================================== */
-	/* [a] Start the encrypt operation within the TEE application. */
-	operation.paramTypes = TEEC_PARAM_TYPES(
-		TEEC_MEMREF_WHOLE,
-		TEEC_MEMREF_PARTIAL_OUTPUT,
-		TEEC_NONE,
-		TEEC_NONE);
-	/* Note that the other fields of operation.params[0].memref need not be
-	initialized because the parameter type is TEEC_MEMREF_WHOLE */
-	operation.params[0].memref.parent = &inputSM;
+// 	/* ========================================================================
+// 	[5] Perform the cryptographic update commands
+// 	======================================================================== */
+// 	/* [a] Start the encrypt operation within the TEE application. */
+// 	operation.paramTypes = TEEC_PARAM_TYPES(
+// 		TEEC_MEMREF_WHOLE,
+// 		TEEC_MEMREF_PARTIAL_OUTPUT,
+// 		TEEC_NONE,
+// 		TEEC_NONE);
+// 	/* Note that the other fields of operation.params[0].memref need not be
+// 	initialized because the parameter type is TEEC_MEMREF_WHOLE */
+// 	operation.params[0].memref.parent = &inputSM;
 
-	operation.params[1].memref.parent = &outputSM;
-	operation.params[1].memref.offset = 0;
-	operation.params[1].memref.size = outputSize;
+// 	operation.params[1].memref.parent = &outputSM;
+// 	operation.params[1].memref.offset = 0;
+// 	operation.params[1].memref.size = outputSize;
 
-	/* Start the encrypt operation within the TEE application. */
-	result = TEEC_InvokeCommand(&session,
-		CMD_ENCRYPT_UPDATE,
-		&operation,
-		NULL);
+// 	/* Start the encrypt operation within the TEE application. */
+// 	result = TEEC_InvokeCommand(&session,
+// 		CMD_ENCRYPT_UPDATE,
+// 		&operation,
+// 		NULL);
 
-	if (result != TEEC_SUCCESS)
-		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_UPDATE failed and returned error code 0x%x", result);
-
-
-
-
-	/* [b] Start the digest operation within the TEE application. */
-	operation.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_PARTIAL_INPUT,
-		TEEC_NONE,
-		TEEC_NONE,
-		TEEC_NONE);
-
-	/* Note: we use the updated size in the MemRef output by the encryption. */
-
-	operation.params[0].memref.parent = &outputSM;
-	operation.params[0].memref.offset = 0;
-	operation.params[0].memref.size = operation.params[1].memref.size;
-
-
-	result = TEEC_InvokeCommand(&session,
-		CMD_DIGEST_UPDATE,
-		&operation,
-		NULL);
-	if (result != TEEC_SUCCESS)
-		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_UPDATE failed and returned error code 0x%x", result);
-
-	/* ========================================================================
-	[6] Perform the cryptographic finalize commands
-	======================================================================== */
-	/* [a] Finalize the encrypt operation within the TEE application. */
-	result = TEEC_InvokeCommand(&session,
-		CMD_ENCRYPT_FINAL,
-		NULL,
-		NULL);
-
-	if (result != TEEC_SUCCESS)
-		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_FINAL failed and returned error code 0x%x", result);
+// 	if (result != TEEC_SUCCESS)
+// 		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_UPDATE failed and returned error code 0x%x", result);
 
 
 
-/* [b] Finalize the digest operation within the TEE application. */
-	operation.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_PARTIAL_OUTPUT,
-		TEEC_NONE,
-		TEEC_NONE,
-		TEEC_NONE);
 
-	operation.params[0].memref.parent = &commsSM;
-	operation.params[0].memref.offset = 0;
-	operation.params[0].memref.size = 20;
+// 	/* [b] Start the digest operation within the TEE application. */
+// 	operation.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_PARTIAL_INPUT,
+// 		TEEC_NONE,
+// 		TEEC_NONE,
+// 		TEEC_NONE);
+
+// 	/* Note: we use the updated size in the MemRef output by the encryption. */
+
+// 	operation.params[0].memref.parent = &outputSM;
+// 	operation.params[0].memref.offset = 0;
+// 	operation.params[0].memref.size = operation.params[1].memref.size;
+
+
+// 	result = TEEC_InvokeCommand(&session,
+// 		CMD_DIGEST_UPDATE,
+// 		&operation,
+// 		NULL);
+// 	if (result != TEEC_SUCCESS)
+// 		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_UPDATE failed and returned error code 0x%x", result);
+
+// 	/* ========================================================================
+// 	[6] Perform the cryptographic finalize commands
+// 	======================================================================== */
+// 	/* [a] Finalize the encrypt operation within the TEE application. */
+// 	result = TEEC_InvokeCommand(&session,
+// 		CMD_ENCRYPT_FINAL,
+// 		NULL,
+// 		NULL);
+
+// 	if (result != TEEC_SUCCESS)
+// 		errx(1, "TEEC_InvokeCommand with CMD_ENCRYPT_FINAL failed and returned error code 0x%x", result);
+
+
+
+// /* [b] Finalize the digest operation within the TEE application. */
+// 	operation.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_PARTIAL_OUTPUT,
+// 		TEEC_NONE,
+// 		TEEC_NONE,
+// 		TEEC_NONE);
+
+// 	operation.params[0].memref.parent = &commsSM;
+// 	operation.params[0].memref.offset = 0;
+// 	operation.params[0].memref.size = 20;
 	
-	result = TEEC_InvokeCommand(&session,
-		CMD_DIGEST_FINAL,
-		&operation,
-		NULL);
-	if (result != TEEC_SUCCESS)
-		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_FINAL failed and returned error code 0x%x", result);
+// 	result = TEEC_InvokeCommand(&session,
+// 		CMD_DIGEST_FINAL,
+// 		&operation,
+// 		NULL);
+// 	if (result != TEEC_SUCCESS)
+// 		errx(1, "TEEC_InvokeCommand with CMD_DIGEST_FINAL failed and returned error code 0x%x", result);
 
-	/* Transfer digest in to user buffer. */
-	memcpy(digestBuffer, commsSM.buffer, 20);
+// 	/* Transfer digest in to user buffer. */
+// 	memcpy(digestBuffer, commsSM.buffer, 20);
 
-	TEEC_ReleaseSharedMemory(&outputSM);
-	TEEC_ReleaseSharedMemory(&inputSM);
-	TEEC_ReleaseSharedMemory(&commsSM);
+// 	TEEC_ReleaseSharedMemory(&outputSM);
+// 	TEEC_ReleaseSharedMemory(&inputSM);
+// 	TEEC_ReleaseSharedMemory(&commsSM);
 
-	TEEC_CloseSession(&session);
-	TEEC_FinalizeContext(&context);
+// 	TEEC_CloseSession(&session);
+// 	TEEC_FinalizeContext(&context);
 
 	return 0;
 }
