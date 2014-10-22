@@ -35,15 +35,20 @@ TEE_Result TA_OpenSessionEntryPoint(uint32_t param_types,
 	(void)&param_types;
  	
  	/* allocate handles which will be used during the session*/
-	data = malloc(sizeof(Sess_data));
+	data = TEE_Malloc(sizeof(Sess_data), 0);
+	data->op_cipher = TEE_Malloc(sizeof(TEE_OperationHandle), 0);
+	data->op_digest = TEE_Malloc(sizeof(TEE_OperationHandle), 0);
 	*sess_ctx = data;
 
 	return TEE_SUCCESS;
 }
 
 void TA_CloseSessionEntryPoint(void *sess_ctx)
-{
-	free(sess_ctx);
+{	
+
+	TEE_Free(((Sess_data *)sess_ctx)->op_cipher);
+	TEE_Free(((Sess_data *)sess_ctx)->op_digest);
+	TEE_Free(sess_ctx);
 }
 
 static TEE_Result encrypt_init(Sess_data* sessiondata,
@@ -59,9 +64,12 @@ static TEE_Result encrypt_init(Sess_data* sessiondata,
 	TEE_Result res;
 	uint32_t flags = TEE_DATA_FLAG_ACCESS_READ; 
 	TEE_ObjectHandle *key = TEE_Malloc(sizeof(TEE_ObjectHandle), 0);
+	TEE_ObjectInfo *keyInfo = TEE_Malloc(sizeof(TEE_ObjectInfo), 0);
+
 	(void)&param_types;
 	/* Opening persistant object and getting key */
-
+	AMSG("Opening Key Object with KeyID=%d\n", params[0].value.a);
+	//printf("KeyID: %d\n", params[0].value.a);
 	res = TEE_OpenPersistentObject(
 			TEE_STORAGE_PRIVATE,
 			&params[0].value.a,
@@ -69,18 +77,34 @@ static TEE_Result encrypt_init(Sess_data* sessiondata,
 			flags,
 			key);
 
+
 	if (res != TEE_SUCCESS)
 		return res;
-	/* Setting operation key */
 
-
+	AMSG("Allocating operation\n");
 	/*Allocating opration */
-
 	res = TEE_AllocateOperation(
 		sessiondata->op_cipher,
 		TEE_ALG_AES_CTS,
 		TEE_MODE_ENCRYPT,
 		128);
+
+	if (res != TEE_SUCCESS)
+		return res;
+
+	AMSG("Operation allocated successfuly\n");
+	/* Setting operation key */
+
+	TEE_GetObjectInfo(
+			*key,
+			keyInfo);
+
+	AMSG("Key Info, objectType: %d, objectUsage:  %x, objectSize: %d, handleFlags:%x, datasize: %d\n",
+		keyInfo->objectType, keyInfo->objectUsage, keyInfo->objectSize, keyInfo->handleFlags, keyInfo->dataSize);
+
+	/*
+		Following code is getting Panic message ????
+	*/
 
 	res = TEE_SetOperationKey(
 		*(sessiondata->op_cipher),
@@ -88,6 +112,7 @@ static TEE_Result encrypt_init(Sess_data* sessiondata,
 	if (res != TEE_SUCCESS)
 		return res;
 
+	AMSG("Key set for the encrypt operation\n");
 	return res;
 }
 
@@ -104,6 +129,9 @@ static TEE_Result key_generation(void)
 	/* implementation constant TEE_MALLOC_FILL_ZERO is not coded !*/
 	TEE_ObjectHandle *key = TEE_Malloc(sizeof(TEE_ObjectHandle), 0);
 	TEE_ObjectHandle *persKey = TEE_Malloc(sizeof(TEE_ObjectHandle), 0);
+	//TEE_ObjectInfo *keyInfo = TEE_Malloc(sizeof(TEE_ObjectInfo), 0);
+	//TEE_ObjectInfo *keyInfo2 = TEE_Malloc(sizeof(TEE_ObjectInfo), 0);
+
 	uint32_t flags = TEE_DATA_FLAG_ACCESS_READ | TEE_DATA_FLAG_ACCESS_WRITE;
 	uint32_t objectID = 1;
 
@@ -119,6 +147,14 @@ static TEE_Result key_generation(void)
 	if (res != TEE_SUCCESS)
 		return res;
 
+	// TEE_GetObjectInfo(
+	// 	*key,
+	// 	keyInfo);
+
+
+//	AMSG("Key Info - objectType: %x, objectUsage:  %x, objectSize: %d, handleFlags:%x, datasize: %d, dataposition: %d\n",
+//		keyInfo->objectType, keyInfo->objectUsage, keyInfo->objectSize, keyInfo->handleFlags, keyInfo->dataSize, keyInfo->dataPosition);
+
 	/* Create a persistent key object from the transient key object 
 	   KeyID is 1
 	 */
@@ -132,6 +168,12 @@ static TEE_Result key_generation(void)
 			0,
 			persKey);
 	AMSG("AES key created !\n");
+	//TEE_GetObjectInfo(
+	//	*persKey,
+	//	keyInfo2);
+
+	//AMSG("Key Info - objectType: %x, objectUsage:  %x, objectSize: %d, handleFlags:%x  datasize: %d, dataposition: %d\n",
+		//keyInfo2->objectType, keyInfo2->objectUsage, keyInfo2->objectSize, keyInfo2->handleFlags, keyInfo2->dataSize, keyInfo2->dataPosition);
 	/* Persistent object is created, we don't need the transient object anymore	*/
 
 	TEE_FreeTransientObject(*key);
