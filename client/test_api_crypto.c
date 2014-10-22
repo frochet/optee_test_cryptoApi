@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
 		uint8_t *outputBuffer = malloc(sizeof(uint8_t));
 		uint32_t outputSize = 16;
 		uint8_t *digestBuffer = malloc(sizeof(uint8_t));
-		
+
 		return encrypt_example_session(
 					inputBuffer,
 					inputSize,
