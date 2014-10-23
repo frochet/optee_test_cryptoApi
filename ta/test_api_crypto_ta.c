@@ -62,7 +62,7 @@ static TEE_Result encrypt_init(Sess_data* sessiondata,
 	// if (params_types != exp_param_types)
 	// 	return TEE_ERROR_BAD_PARAMETERS;
 	TEE_Result res;
-	uint32_t flags = TEE_DATA_FLAG_ACCESS_READ; 
+	uint32_t flags = TEE_DATA_FLAG_ACCESS_READ | TEE_DATA_FLAG_ACCESS_WRITE;
 	TEE_ObjectHandle *key = TEE_Malloc(sizeof(TEE_ObjectHandle), 0);
 	TEE_ObjectInfo *keyInfo = TEE_Malloc(sizeof(TEE_ObjectInfo), 0);
 
@@ -76,6 +76,13 @@ static TEE_Result encrypt_init(Sess_data* sessiondata,
 			sizeof(uint32_t),
 			flags,
 			key);
+
+	TEE_GetObjectInfo(
+			*key,
+			keyInfo);
+
+	AMSG("Key Info, objectType: %x, objectUsage:  %x, objectSize: %d, handleFlags:%x, datasize: %d\n",
+		keyInfo->objectType, keyInfo->objectUsage, keyInfo->objectSize, keyInfo->handleFlags, keyInfo->dataSize);
 
 
 	if (res != TEE_SUCCESS)
@@ -95,13 +102,6 @@ static TEE_Result encrypt_init(Sess_data* sessiondata,
 	AMSG("Operation allocated successfuly\n");
 	/* Setting operation key */
 
-	TEE_GetObjectInfo(
-			*key,
-			keyInfo);
-
-	AMSG("Key Info, objectType: %d, objectUsage:  %x, objectSize: %d, handleFlags:%x, datasize: %d\n",
-		keyInfo->objectType, keyInfo->objectUsage, keyInfo->objectSize, keyInfo->handleFlags, keyInfo->dataSize);
-
 	/*
 		Following code is getting Panic message ????
 	*/
@@ -113,6 +113,9 @@ static TEE_Result encrypt_init(Sess_data* sessiondata,
 		return res;
 
 	AMSG("Key set for the encrypt operation\n");
+
+	TEE_Free(key);
+	TEE_Free(keyInfo);
 	return res;
 }
 

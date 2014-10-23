@@ -43,6 +43,8 @@
 #define TA_CURRENT_TA_EXT_PROPERTIES \
     { "gp.ta.description", USER_TA_PROP_TYPE_STRING, \
         "Test API crypto TA" }, \
-    { "gp.ta.version", USER_TA_PROP_TYPE_U32, &(const uint32_t){ 0x0010 } }
+    { "gp.ta.version", USER_TA_PROP_TYPE_U32, &(const uint32_t){ 0x0010 }}, \
+    { TA_PROP_STR_SINGLE_INSTANCE, USER_TA_PROP_TYPE_BOOL, &(bool){1}}, \
+    { TA_PROP_STR_KEEP_ALIVE, USER_TA_PROP_TYPE_BOOL, &(bool) {1}}
 
 #endif /*USER_TA_HEADER_DEFINES_H*/
